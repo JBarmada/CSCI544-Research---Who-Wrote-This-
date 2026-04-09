@@ -28,7 +28,7 @@ salloc \
     bash -c "
         module purge
         module load conda
-        conda activate binoculars
+        source activate binoculars
         cd $(pwd)
         python main.py --source hf $EXTRA_ARGS
     "
