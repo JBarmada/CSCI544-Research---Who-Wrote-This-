@@ -7,8 +7,8 @@
 #SBATCH --time=01:00:00
 #SBATCH --output=logs/sample_%j.out
 #SBATCH --error=logs/sample_%j.err
-# Replace with your CARC allocation account:
-##SBATCH --account=your_project_account
+
+#SBATCH --account=snazaria_1817
 
 # =============================================================================
 # job_sample.sl — sbatch job for sample runs

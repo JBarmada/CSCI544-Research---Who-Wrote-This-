@@ -7,8 +7,8 @@
 #SBATCH --time=24:00:00
 #SBATCH --output=logs/full_%j.out
 #SBATCH --error=logs/full_%j.err
-# Replace with your CARC allocation account:
-##SBATCH --account=your_project_account
+
+#SBATCH --account=snazaria_1817
 
 # =============================================================================
 # job.sl — sbatch job for full dataset runs

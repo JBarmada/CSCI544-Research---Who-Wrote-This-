@@ -1,5 +1,7 @@
 import argparse
+import json
 import os
+import datetime
 from src import config
 from src.data_loader import load_hf_dataset, load_local_dataset
 from src.preprocessor import preprocess_data
@@ -31,16 +33,62 @@ def parse_args():
         help="Detection mode: 'accuracy' (F1-optimised) or 'low-fpr' (0.01%% FPR). (default: accuracy)"
     )
     parser.add_argument(
-        "--output", default="results.csv",
-        help="Output filename inside results/. (default: results.csv)"
+        "--output", default="results.json",
+        help="Output filename inside results/. (default: results.json)"
     )
     return parser.parse_args()
+
+
+def save_results_json(df_scored, args, threshold, rows_loaded, rows_after_preprocess, output_path):
+    """Save scored results as a structured JSON file with run metadata and per-row records."""
+
+    ai_count = (df_scored["binoculars_prediction"] == "Most likely AI-generated").sum()
+    human_count = (df_scored["binoculars_prediction"] == "Most likely human-generated").sum()
+    error_count = (df_scored["binoculars_prediction"] == "Error").sum()
+    scored = df_scored["binoculars_score"].notna().sum()
+    valid_scores = df_scored["binoculars_score"].dropna()
+
+    source_info = (
+        {"type": "huggingface", "dataset": args.dataset}
+        if args.source == "hf"
+        else {"type": "local", "file": args.file}
+    )
+
+    output = {
+        "run": {
+            "timestamp": datetime.datetime.utcnow().isoformat() + "Z",
+            "source": source_info,
+            "sample_size_requested": args.sample,
+            "mode": args.mode,
+            "threshold": threshold,
+            "observer_model": config.OBSERVER_MODEL,
+            "performer_model": config.PERFORMER_MODEL,
+            "batch_size": config.BATCH_SIZE,
+            "min_words_filter": config.MIN_WORDS,
+        },
+        "summary": {
+            "rows_loaded": rows_loaded,
+            "rows_after_preprocessing": rows_after_preprocess,
+            "rows_scored_successfully": int(scored),
+            "rows_with_errors": int(error_count),
+            "ai_generated_count": int(ai_count),
+            "human_generated_count": int(human_count),
+            "ai_generated_pct": round(ai_count / scored * 100, 2) if scored > 0 else None,
+            "score_mean": round(float(valid_scores.mean()), 6) if len(valid_scores) > 0 else None,
+            "score_std": round(float(valid_scores.std()), 6) if len(valid_scores) > 0 else None,
+            "score_min": round(float(valid_scores.min()), 6) if len(valid_scores) > 0 else None,
+            "score_max": round(float(valid_scores.max()), 6) if len(valid_scores) > 0 else None,
+        },
+        "results": df_scored.to_dict(orient="records"),
+    }
+
+    with open(output_path, "w", encoding="utf-8") as f:
+        json.dump(output, f, indent=2, ensure_ascii=False, default=str)
 
 
 def main():
     args = parse_args()
 
-    # Resolve threshold from mode
     threshold = (
         config.BINO_THRESHOLD if args.mode == "accuracy"
         else config.BINO_THRESHOLD_LOW_FPR
@@ -56,12 +104,16 @@ def main():
             raise ValueError("--file is required when --source=local")
         df = load_local_dataset(args.file, sample_size=args.sample)
 
+    rows_loaded = len(df)
+
     # --- STEP 2: PREPROCESS ---
     df_clean = preprocess_data(
         df,
         text_column=config.TEXT_COLUMN,
         min_words=config.MIN_WORDS
     )
+
+    rows_after_preprocess = len(df_clean)
 
     # --- STEP 3: SCORE ---
     df_scored = score_dataframe(
@@ -73,11 +125,18 @@ def main():
     )
 
     # --- STEP 4: SAVE ---
-    output_path = os.path.join(config.RESULTS_DIR, args.output)
-    df_scored.to_csv(output_path, index=False)
+    # Ensure output filename ends with .json
+    output_name = args.output if args.output.endswith(".json") else args.output.replace(".csv", "") + ".json"
+    output_path = os.path.join(config.RESULTS_DIR, output_name)
+
+    save_results_json(df_scored, args, threshold, rows_loaded, rows_after_preprocess, output_path)
+
+    ai_count = (df_scored["binoculars_prediction"] == "Most likely AI-generated").sum()
     print(f"\nPipeline complete! Results saved to: {output_path}")
-    print(f"  Rows scored : {len(df_scored):,}")
-    print(f"  Mode        : {args.mode}  (threshold={threshold})")
+    print(f"  Rows loaded     : {rows_loaded:,}")
+    print(f"  Rows scored     : {rows_after_preprocess:,}")
+    print(f"  AI-generated    : {ai_count:,}  ({ai_count/rows_after_preprocess*100:.1f}%)")
+    print(f"  Mode            : {args.mode}  (threshold={threshold})")
 
 
 if __name__ == "__main__":
