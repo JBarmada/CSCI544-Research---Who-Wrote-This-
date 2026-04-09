@@ -1,0 +1,14 @@
+# Binoculars — install from the paper's official GitHub (NOT the PyPI 'binoculars' package,
+# which is an unrelated binomial CI library)
+git+https://github.com/ahans30/Binoculars.git
+
+# Core ML / NLP
+transformers==4.31.0
+torch
+accelerate
+sentencepiece
+
+# Data
+datasets
+pandas
+numpy
