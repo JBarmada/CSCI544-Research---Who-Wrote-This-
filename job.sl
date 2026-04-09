@@ -27,7 +27,7 @@
 
 module purge
 module load conda
-conda activate binoculars
+source activate binoculars
 
 MODE=${MODE:-accuracy}
 OUTPUT=${OUTPUT:-full_results.csv}

@@ -21,7 +21,7 @@
 
 module purge
 module load conda
-conda activate binoculars
+source activate binoculars
 
 # Configurable via env vars; fall back to defaults
 SAMPLE=${SAMPLE:-100}
