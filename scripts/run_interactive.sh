@@ -20,7 +20,7 @@ fi
 
 salloc \
     --partition=gpu \
-    --gres=gpu:a100:1 \
+    --gres=gpu:a40:1 \
     --cpus-per-task=8 \
     --mem=32G \
     --time=01:00:00 \
