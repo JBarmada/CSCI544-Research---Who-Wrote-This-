@@ -25,6 +25,10 @@ def parse_args():
         help="Local filename inside data/raw/ (e.g. my_data.csv). Required when --source=local."
     )
     parser.add_argument(
+        "--split", default="post_2022",
+        help="HuggingFace dataset split to use. For this dataset: 'post_2022' or 'pre_2022'. (default: post_2022)"
+    )
+    parser.add_argument(
         "--sample", type=int, default=None,
         help="Number of rows to use. Omit to run on the full dataset."
     )
@@ -102,7 +106,7 @@ def main():
 
     # --- STEP 1: LOAD DATA ---
     if args.source == "hf":
-        df = load_hf_dataset(args.dataset, sample_size=args.sample)
+        df = load_hf_dataset(args.dataset, split=args.split, sample_size=args.sample)
     else:
         if not args.file:
             raise ValueError("--file is required when --source=local")

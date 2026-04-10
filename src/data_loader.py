@@ -3,7 +3,7 @@ import pandas as pd
 import os
 
 
-def load_hf_dataset(dataset_name, split="train", sample_size=None):
+def load_hf_dataset(dataset_name, split="post_2022", sample_size=None):
     """Loads a dataset from the Hugging Face Hub.
 
     Args:
