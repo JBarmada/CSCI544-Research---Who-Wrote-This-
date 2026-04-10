@@ -2,15 +2,15 @@
 # =============================================================================
 # check_setup.sh — Fast setup + pipeline check using the debug partition
 #
-# Uses the debug partition for near-instant allocation (no GPU, CPU only).
-# Runs --dry-run to verify the full pipeline (imports, data loading,
-# preprocessing, file writing) WITHOUT triggering model inference.
+# Bypasses module load and conda run entirely by calling the env's Python
+# directly — much faster startup.
 #
 # Usage:
 #   bash scripts/check_setup.sh
 # =============================================================================
 
 PROJECT_DIR=$(pwd)
+PYTHON="/home1/barmada/.conda/envs/binoculars/bin/python"
 
 salloc \
     --partition=debug \
@@ -24,42 +24,56 @@ salloc \
         echo '========================================'
         echo ''
 
-        # --- 1. Conda env ---
-        echo '[1/4] Activating conda environment...'
-        module purge
-        module load conda
-        conda run -n binoculars python -c 'import sys; print(\"  Python:\", sys.executable)' \
-            && echo '  OK' || { echo '  FAIL — run bash scripts/setup_env.sh first'; exit 1; }
+        # --- 1. Python env ---
+        echo '[1/4] Python executable...'
+        $PYTHON -c 'import sys; print(\"  \", sys.executable)' \
+            || { echo '  FAIL — env not found at $PYTHON'; exit 1; }
 
-        # --- 2. Imports ---
+        # --- 2+3. All imports + Binoculars in one shot ---
         echo ''
         echo '[2/4] Checking all imports...'
-        conda run -n binoculars python -c '
-import datasets; print(\"  datasets  :\", datasets.__version__)
-import transformers; print(\"  transformers:\", transformers.__version__)
-import torch; print(\"  torch     :\", torch.__version__)
-import pandas; print(\"  pandas    :\", pandas.__version__)
-import numpy; print(\"  numpy     :\", numpy.__version__)
-print(\"  OK\")
-' || { echo '  FAIL — missing packages'; exit 1; }
+        $PYTHON -c '
+import sys
 
-        # --- 3. Binoculars library ---
+checks = [
+    (\"datasets\",     \"datasets\"),
+    (\"transformers\", \"transformers\"),
+    (\"torch\",        \"torch\"),
+    (\"pandas\",       \"pandas\"),
+    (\"numpy\",        \"numpy\"),
+]
+
+all_ok = True
+for label, mod in checks:
+    try:
+        m = __import__(mod)
+        ver = getattr(m, \"__version__\", \"?\")
+        print(f\"  {label:<14} {ver}\")
+    except ImportError as e:
+        print(f\"  {label:<14} MISSING — {e}\")
+        all_ok = False
+
+if not all_ok:
+    sys.exit(1)
+print(\"  OK\")
+' || exit 1
+
         echo ''
         echo '[3/4] Checking Binoculars library...'
-        conda run -n binoculars python -c '
+        $PYTHON -c '
 from binoculars import Binoculars
-print(\"  Binoculars class found: OK\")
-' || { echo '  FAIL — install with: pip install git+https://github.com/ahans30/Binoculars.git'; exit 1; }
+print(\"  Binoculars: OK\")
+' || { echo '  FAIL — run: pip install git+https://github.com/ahans30/Binoculars.git'; exit 1; }
 
         # --- 4. Dry-run pipeline ---
         echo ''
-        echo '[4/4] Running dry-run pipeline (5 rows, no inference)...'
-        conda run -n binoculars python $PROJECT_DIR/main.py \
+        echo '[4/4] Dry-run pipeline (5 rows, no inference)...'
+        $PYTHON $PROJECT_DIR/main.py \
             --source hf \
             --sample 5 \
             --dry-run \
             --output check_setup_dryrun.json \
-            && echo '  Pipeline OK' || { echo '  FAIL — check error above'; exit 1; }
+            && echo '  Pipeline: OK' || exit 1
 
         echo ''
         echo '========================================'
