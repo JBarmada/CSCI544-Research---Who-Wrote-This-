@@ -36,6 +36,10 @@ def parse_args():
         "--output", default="results.json",
         help="Output filename inside results/. (default: results.json)"
     )
+    parser.add_argument(
+        "--dry-run", action="store_true",
+        help="Skip model inference. Loads and preprocesses data only — use to verify the pipeline works before committing to a GPU allocation."
+    )
     return parser.parse_args()
 
 
@@ -115,17 +119,22 @@ def main():
 
     rows_after_preprocess = len(df_clean)
 
-    # --- STEP 3: SCORE ---
-    df_scored = score_dataframe(
-        df_clean,
-        text_column=config.TEXT_COLUMN,
-        batch_size=config.BATCH_SIZE,
-        mode=args.mode,
-        threshold=threshold
-    )
+    # --- STEP 3: SCORE (skipped in dry-run mode) ---
+    if args.dry_run:
+        print("\n[DRY RUN] Skipping model inference.")
+        df_scored = df_clean.copy()
+        df_scored["binoculars_score"] = None
+        df_scored["binoculars_prediction"] = "DRY_RUN"
+    else:
+        df_scored = score_dataframe(
+            df_clean,
+            text_column=config.TEXT_COLUMN,
+            batch_size=config.BATCH_SIZE,
+            mode=args.mode,
+            threshold=threshold
+        )
 
     # --- STEP 4: SAVE ---
-    # Ensure output filename ends with .json
     output_name = args.output if args.output.endswith(".json") else args.output.replace(".csv", "") + ".json"
     output_path = os.path.join(config.RESULTS_DIR, output_name)
 
@@ -135,8 +144,11 @@ def main():
     print(f"\nPipeline complete! Results saved to: {output_path}")
     print(f"  Rows loaded     : {rows_loaded:,}")
     print(f"  Rows scored     : {rows_after_preprocess:,}")
-    print(f"  AI-generated    : {ai_count:,}  ({ai_count/rows_after_preprocess*100:.1f}%)")
+    if not args.dry_run:
+        print(f"  AI-generated    : {ai_count:,}  ({ai_count/rows_after_preprocess*100:.1f}%)")
     print(f"  Mode            : {args.mode}  (threshold={threshold})")
+    if args.dry_run:
+        print("  [DRY RUN] No inference was performed. Re-run without --dry-run to score.")
 
 
 if __name__ == "__main__":
