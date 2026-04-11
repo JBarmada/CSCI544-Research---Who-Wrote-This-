@@ -1,0 +1,485 @@
+{
+  "source_file": "results/sample_results.json",
+  "run": {
+    "timestamp": "2026-04-10T03:20:24.904664Z",
+    "source": {
+      "type": "huggingface",
+      "dataset": "validname/reddit-ai-detection-english-80k"
+    },
+    "sample_size_requested": 100,
+    "mode": "accuracy",
+    "threshold": 0.9015310749276843,
+    "observer_model": "tiiuae/falcon-7b",
+    "performer_model": "tiiuae/falcon-7b-instruct",
+    "batch_size": 8,
+    "min_words_filter": 20
+  },
+  "overall": {
+    "total_rows": 100,
+    "rows_scored": 100,
+    "rows_errors": 0,
+    "ai_count": 9,
+    "human_count": 91,
+    "ai_pct": 9.0,
+    "score_mean": 0.990628,
+    "score_std": 0.067988,
+    "score_median": 1.0,
+    "score_min": 0.78836,
+    "score_max": 1.165644,
+    "score_25pct": 0.946484,
+    "score_75pct": 1.034393
+  },
+  "by_subreddit": [
+    {
+      "subreddit": "investing",
+      "total": 20,
+      "ai_count": 3,
+      "human_count": 17,
+      "ai_pct": 15.0,
+      "score_mean": 0.968555,
+      "score_std": 0.061367,
+      "score_min": 0.869347,
+      "score_max": 1.066986
+    },
+    {
+      "subreddit": "PoliticalDiscussion",
+      "total": 18,
+      "ai_count": 1,
+      "human_count": 17,
+      "ai_pct": 5.56,
+      "score_mean": 0.971514,
+      "score_std": 0.058506,
+      "score_min": 0.89011,
+      "score_max": 1.115703
+    },
+    {
+      "subreddit": "LifeProTips",
+      "total": 16,
+      "ai_count": 2,
+      "human_count": 14,
+      "ai_pct": 12.5,
+      "score_mean": 1.014991,
+      "score_std": 0.095182,
+      "score_min": 0.820809,
+      "score_max": 1.165644
+    },
+    {
+      "subreddit": "CollegeBasketball",
+      "total": 14,
+      "ai_count": 1,
+      "human_count": 13,
+      "ai_pct": 7.14,
+      "score_mean": 0.995633,
+      "score_std": 0.080563,
+      "score_min": 0.78836,
+      "score_max": 1.078534
+    },
+    {
+      "subreddit": "technology",
+      "total": 9,
+      "ai_count": 1,
+      "human_count": 8,
+      "ai_pct": 11.11,
+      "score_mean": 0.999593,
+      "score_std": 0.058219,
+      "score_min": 0.873737,
+      "score_max": 1.054945
+    },
+    {
+      "subreddit": "gaming",
+      "total": 7,
+      "ai_count": 1,
+      "human_count": 6,
+      "ai_pct": 14.29,
+      "score_mean": 0.975468,
+      "score_std": 0.051189,
+      "score_min": 0.889447,
+      "score_max": 1.058201
+    },
+    {
+      "subreddit": "science",
+      "total": 4,
+      "ai_count": 0,
+      "human_count": 4,
+      "ai_pct": 0.0,
+      "score_mean": 0.992116,
+      "score_std": 0.042225,
+      "score_min": 0.930556,
+      "score_max": 1.024272
+    },
+    {
+      "subreddit": "Minecraft",
+      "total": 3,
+      "ai_count": 0,
+      "human_count": 3,
+      "ai_pct": 0.0,
+      "score_mean": 1.024754,
+      "score_std": 0.066757,
+      "score_min": 0.953608,
+      "score_max": 1.086022
+    },
+    {
+      "subreddit": "askscience",
+      "total": 3,
+      "ai_count": 0,
+      "human_count": 3,
+      "ai_pct": 0.0,
+      "score_mean": 1.048874,
+      "score_std": 0.029596,
+      "score_min": 1.020833,
+      "score_max": 1.079812
+    },
+    {
+      "subreddit": "harrypotter",
+      "total": 2,
+      "ai_count": 0,
+      "human_count": 2,
+      "ai_pct": 0.0,
+      "score_mean": 1.013584,
+      "score_std": 0.005931,
+      "score_min": 1.00939,
+      "score_max": 1.017778
+    },
+    {
+      "subreddit": "AskScienceFiction",
+      "total": 1,
+      "ai_count": 0,
+      "human_count": 1,
+      "ai_pct": 0.0,
+      "score_mean": 1.043478,
+      "score_std": null,
+      "score_min": 1.043478,
+      "score_max": 1.043478
+    },
+    {
+      "subreddit": "MovieSuggestions",
+      "total": 1,
+      "ai_count": 0,
+      "human_count": 1,
+      "ai_pct": 0.0,
+      "score_mean": 1.020202,
+      "score_std": null,
+      "score_min": 1.020202,
+      "score_max": 1.020202
+    },
+    {
+      "subreddit": "investingforbeginners",
+      "total": 1,
+      "ai_count": 0,
+      "human_count": 1,
+      "ai_pct": 0.0,
+      "score_mean": 0.959799,
+      "score_std": null,
+      "score_min": 0.959799,
+      "score_max": 0.959799
+    },
+    {
+      "subreddit": "moviescirclejerk",
+      "total": 1,
+      "ai_count": 0,
+      "human_count": 1,
+      "ai_pct": 0.0,
+      "score_mean": 0.961111,
+      "score_std": null,
+      "score_min": 0.961111,
+      "score_max": 0.961111
+    }
+  ],
+  "by_post_type": [
+    {
+      "post_type": "comment",
+      "total": 99,
+      "ai_count": 9,
+      "human_count": 90,
+      "ai_pct": 9.09,
+      "score_mean": 0.990117,
+      "score_std": 0.068141,
+      "score_min": 0.78836,
+      "score_max": 1.165644
+    },
+    {
+      "post_type": "submission",
+      "total": 1,
+      "ai_count": 0,
+      "human_count": 1,
+      "ai_pct": 0.0,
+      "score_mean": 1.041237,
+      "score_std": null,
+      "score_min": 1.041237,
+      "score_max": 1.041237
+    }
+  ],
+  "by_year": [
+    {
+      "year": "2024",
+      "total": 40,
+      "ai_count": 5,
+      "human_count": 35,
+      "ai_pct": 12.5,
+      "score_mean": 0.976068,
+      "score_std": 0.070319,
+      "score_min": 0.78836,
+      "score_max": 1.103825
+    },
+    {
+      "year": "2023",
+      "total": 30,
+      "ai_count": 2,
+      "human_count": 28,
+      "ai_pct": 6.67,
+      "score_mean": 1.003081,
+      "score_std": 0.074915,
+      "score_min": 0.873737,
+      "score_max": 1.165644
+    },
+    {
+      "year": "2025",
+      "total": 18,
+      "ai_count": 0,
+      "human_count": 18,
+      "ai_pct": 0.0,
+      "score_mean": 1.003571,
+      "score_std": 0.041507,
+      "score_min": 0.919431,
+      "score_max": 1.077348
+    },
+    {
+      "year": "2022",
+      "total": 12,
+      "ai_count": 2,
+      "human_count": 10,
+      "ai_pct": 16.67,
+      "score_mean": 0.988616,
+      "score_std": 0.071691,
+      "score_min": 0.820809,
+      "score_max": 1.062827
+    }
+  ],
+  "by_length_bin": [
+    {
+      "length_bin": "short",
+      "total": 67,
+      "ai_count": 8,
+      "human_count": 59,
+      "ai_pct": 11.94,
+      "score_mean": 0.98724,
+      "score_std": 0.071585,
+      "score_min": 0.78836,
+      "score_max": 1.115703
+    },
+    {
+      "length_bin": "medium",
+      "total": 30,
+      "ai_count": 1,
+      "human_count": 29,
+      "ai_pct": 3.33,
+      "score_mean": 0.991825,
+      "score_std": 0.06032,
+      "score_min": 0.823529,
+      "score_max": 1.165644
+    },
+    {
+      "length_bin": "long",
+      "total": 2,
+      "ai_count": 0,
+      "human_count": 2,
+      "ai_pct": 0.0,
+      "score_mean": 1.042219,
+      "score_std": 0.005314,
+      "score_min": 1.038462,
+      "score_max": 1.045977
+    },
+    {
+      "length_bin": "very_long",
+      "total": 1,
+      "ai_count": 0,
+      "human_count": 1,
+      "ai_pct": 0.0,
+      "score_mean": 1.078534,
+      "score_std": null,
+      "score_min": 1.078534,
+      "score_max": 1.078534
+    }
+  ],
+  "by_domain": [
+    {
+      "domain": "finance",
+      "total": 21,
+      "ai_count": 3,
+      "human_count": 18,
+      "ai_pct": 14.29,
+      "score_mean": 0.968138,
+      "score_std": 0.059843,
+      "score_min": 0.869347,
+      "score_max": 1.066986
+    },
+    {
+      "domain": "news",
+      "total": 18,
+      "ai_count": 1,
+      "human_count": 17,
+      "ai_pct": 5.56,
+      "score_mean": 0.971514,
+      "score_std": 0.058506,
+      "score_min": 0.89011,
+      "score_max": 1.115703
+    },
+    {
+      "domain": "lifestyle",
+      "total": 16,
+      "ai_count": 2,
+      "human_count": 14,
+      "ai_pct": 12.5,
+      "score_mean": 1.014991,
+      "score_std": 0.095182,
+      "score_min": 0.820809,
+      "score_max": 1.165644
+    },
+    {
+      "domain": "entertainment",
+      "total": 14,
+      "ai_count": 1,
+      "human_count": 13,
+      "ai_pct": 7.14,
+      "score_mean": 0.993644,
+      "score_std": 0.049958,
+      "score_min": 0.889447,
+      "score_max": 1.086022
+    },
+    {
+      "domain": "sports",
+      "total": 14,
+      "ai_count": 1,
+      "human_count": 13,
+      "ai_pct": 7.14,
+      "score_mean": 0.995633,
+      "score_std": 0.080563,
+      "score_min": 0.78836,
+      "score_max": 1.078534
+    },
+    {
+      "domain": "technology",
+      "total": 9,
+      "ai_count": 1,
+      "human_count": 8,
+      "ai_pct": 11.11,
+      "score_mean": 0.999593,
+      "score_std": 0.058219,
+      "score_min": 0.873737,
+      "score_max": 1.054945
+    },
+    {
+      "domain": "science",
+      "total": 8,
+      "ai_count": 0,
+      "human_count": 8,
+      "ai_pct": 0.0,
+      "score_mean": 1.019821,
+      "score_std": 0.043528,
+      "score_min": 0.930556,
+      "score_max": 1.079812
+    }
+  ],
+  "score_histogram": [
+    {
+      "bin_start": 0.787,
+      "bin_end": 0.807,
+      "count": 1
+    },
+    {
+      "bin_start": 0.807,
+      "bin_end": 0.826,
+      "count": 2
+    },
+    {
+      "bin_start": 0.826,
+      "bin_end": 0.845,
+      "count": 0
+    },
+    {
+      "bin_start": 0.845,
+      "bin_end": 0.864,
+      "count": 0
+    },
+    {
+      "bin_start": 0.864,
+      "bin_end": 0.883,
+      "count": 2
+    },
+    {
+      "bin_start": 0.883,
+      "bin_end": 0.902,
+      "count": 4
+    },
+    {
+      "bin_start": 0.902,
+      "bin_end": 0.92,
+      "count": 8
+    },
+    {
+      "bin_start": 0.92,
+      "bin_end": 0.939,
+      "count": 6
+    },
+    {
+      "bin_start": 0.939,
+      "bin_end": 0.958,
+      "count": 7
+    },
+    {
+      "bin_start": 0.958,
+      "bin_end": 0.977,
+      "count": 8
+    },
+    {
+      "bin_start": 0.977,
+      "bin_end": 0.996,
+      "count": 11
+    },
+    {
+      "bin_start": 0.996,
+      "bin_end": 1.015,
+      "count": 12
+    },
+    {
+      "bin_start": 1.015,
+      "bin_end": 1.034,
+      "count": 12
+    },
+    {
+      "bin_start": 1.034,
+      "bin_end": 1.052,
+      "count": 11
+    },
+    {
+      "bin_start": 1.052,
+      "bin_end": 1.071,
+      "count": 5
+    },
+    {
+      "bin_start": 1.071,
+      "bin_end": 1.09,
+      "count": 6
+    },
+    {
+      "bin_start": 1.09,
+      "bin_end": 1.109,
+      "count": 1
+    },
+    {
+      "bin_start": 1.109,
+      "bin_end": 1.128,
+      "count": 3
+    },
+    {
+      "bin_start": 1.128,
+      "bin_end": 1.147,
+      "count": 0
+    },
+    {
+      "bin_start": 1.147,
+      "bin_end": 1.166,
+      "count": 1
+    }
+  ]
+}
