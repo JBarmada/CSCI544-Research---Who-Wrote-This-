@@ -25,7 +25,8 @@ PYTHON="/home1/barmada/.conda/envs/binoculars/bin/python"
 SAMPLE=${SAMPLE:-100}
 SPLIT=${SPLIT:-post_2022}
 MODE=${MODE:-accuracy}
-OUTPUT=${OUTPUT:-sample_results.json}
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+OUTPUT=${OUTPUT:-sample_${SPLIT}_n${SAMPLE}_${MODE}_${TIMESTAMP}_job${SLURM_JOB_ID}.json}
 
 echo "Job ID       : $SLURM_JOB_ID"
 echo "Node         : $SLURMD_NODENAME"

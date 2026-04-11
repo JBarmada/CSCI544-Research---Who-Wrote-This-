@@ -23,7 +23,8 @@ PYTHON="/home1/barmada/.conda/envs/binoculars/bin/python"
 
 SPLIT=${SPLIT:-post_2022}
 MODE=${MODE:-accuracy}
-OUTPUT=${OUTPUT:-full_results.json}
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+OUTPUT=${OUTPUT:-full_${SPLIT}_${MODE}_${TIMESTAMP}_job${SLURM_JOB_ID}.json}
 
 echo "Job ID       : $SLURM_JOB_ID"
 echo "Node         : $SLURMD_NODENAME"
