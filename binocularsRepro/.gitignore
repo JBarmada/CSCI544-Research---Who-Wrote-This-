@@ -1,0 +1,8 @@
+.upstream/
+logs/*.out
+logs/*.err
+results/*/
+!results/.gitkeep
+!logs/.gitkeep
+__pycache__/
+*.pyc
