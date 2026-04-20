@@ -9,6 +9,14 @@ PYTHON="${PYTHON:-/home1/barmada/.conda/envs/binoculars/bin/python}"
 DATASET_PATH="${DATASET_PATH:-$UPSTREAM_DIR/datasets/core/cc_news/cc_news-llama2_13.jsonl}"
 HUMAN_SAMPLE_KEY="${HUMAN_SAMPLE_KEY:-text}"
 MACHINE_SAMPLE_KEY="${MACHINE_SAMPLE_KEY:-meta-llama-Llama-2-13b-hf_generated_text_wo_prompt}"
+export OPENBLAS_NUM_THREADS="${OPENBLAS_NUM_THREADS:-1}"
+export OMP_NUM_THREADS="${OMP_NUM_THREADS:-1}"
+export MKL_NUM_THREADS="${MKL_NUM_THREADS:-1}"
+export NUMEXPR_NUM_THREADS="${NUMEXPR_NUM_THREADS:-1}"
+export TOKENIZERS_PARALLELISM="${TOKENIZERS_PARALLELISM:-false}"
+export PYTHONNOUSERSITE="${PYTHONNOUSERSITE:-1}"
+unset PYTHONPATH
+unset PYTHONHOME
 
 salloc \
     --partition=debug \
@@ -18,6 +26,15 @@ salloc \
     --account=snazaria_1817 \
     bash -lc "
         set -euo pipefail
+        module purge >/dev/null 2>&1 || true
+        export OPENBLAS_NUM_THREADS='$OPENBLAS_NUM_THREADS'
+        export OMP_NUM_THREADS='$OMP_NUM_THREADS'
+        export MKL_NUM_THREADS='$MKL_NUM_THREADS'
+        export NUMEXPR_NUM_THREADS='$NUMEXPR_NUM_THREADS'
+        export TOKENIZERS_PARALLELISM='$TOKENIZERS_PARALLELISM'
+        export PYTHONNOUSERSITE='$PYTHONNOUSERSITE'
+        unset PYTHONPATH
+        unset PYTHONHOME
         echo '========================================'
         echo ' Binoculars Reproduction Check'
         echo '========================================'

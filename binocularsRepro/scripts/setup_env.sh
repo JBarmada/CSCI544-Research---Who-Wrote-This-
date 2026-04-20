@@ -27,9 +27,19 @@ if ! conda env list | awk '{print $1}' | grep -qx "$ENV_NAME"; then
 fi
 
 conda activate "$ENV_NAME"
-pip install --upgrade pip
-pip install -e "$UPSTREAM_DIR"
-pip install -r "$PROJECT_DIR/requirements.txt"
+export OPENBLAS_NUM_THREADS="${OPENBLAS_NUM_THREADS:-1}"
+export OMP_NUM_THREADS="${OMP_NUM_THREADS:-1}"
+export MKL_NUM_THREADS="${MKL_NUM_THREADS:-1}"
+export NUMEXPR_NUM_THREADS="${NUMEXPR_NUM_THREADS:-1}"
+export TOKENIZERS_PARALLELISM="${TOKENIZERS_PARALLELISM:-false}"
+export PYTHONNOUSERSITE="${PYTHONNOUSERSITE:-1}"
+unset PYTHONPATH
+unset PYTHONHOME
+
+python -m pip install --upgrade pip
+python -m pip install --upgrade "numpy<2"
+python -m pip install -e "$UPSTREAM_DIR"
+python -m pip install -r "$PROJECT_DIR/requirements.txt"
 
 echo
 echo "Setup complete."
