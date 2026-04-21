@@ -12,7 +12,6 @@ DATASET_NAME="CNN" \
 HUMAN_SAMPLE_KEY="article" \
 MACHINE_SAMPLE_KEY="meta-llama-Llama-2-13b-hf_generated_text_wo_prompt" \
 MACHINE_TEXT_SOURCE="LLaMA-2-13B" \
-JOB_NAME="CNN-LLaMA-2-13B-512-tokens" \
 sbatch "$PROJECT_DIR/job.sl"
 
 DATASET_PATH="$UPSTREAM_DIR/datasets/core/pubmed/pubmed-llama2_13.jsonl" \
@@ -20,5 +19,4 @@ DATASET_NAME="PubMed" \
 HUMAN_SAMPLE_KEY="article" \
 MACHINE_SAMPLE_KEY="meta-llama-Llama-2-13b-hf_generated_text_wo_prompt" \
 MACHINE_TEXT_SOURCE="LLaMA-2-13B" \
-JOB_NAME="PubMed-LLaMA-2-13B-512-tokens" \
 sbatch "$PROJECT_DIR/job.sl"
