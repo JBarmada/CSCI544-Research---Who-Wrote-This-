@@ -77,4 +77,5 @@ Each run writes to `results/<job_name>/`:
 - `score_df.csv`
 - `performance.png`
 - `experiments_details.json`
+- `system_info.txt`
 - `analysis.json` after running `python analyze.py --input results/<job_name>`

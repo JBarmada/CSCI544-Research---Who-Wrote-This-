@@ -33,12 +33,14 @@ BATCH_SIZE="${BATCH_SIZE:-32}"
 MODE="${MODE:-accuracy}"
 JOB_NAME="${JOB_NAME:-${DATASET_NAME}-${MACHINE_TEXT_SOURCE}-${TOKENS_SEEN}-tokens}"
 LIMIT_ARG=""
+RUN_DIR="$PROJECT_DIR/results/$JOB_NAME"
+SYSTEM_INFO_FILE="$RUN_DIR/system_info.txt"
 
 if [[ -n "${LIMIT:-}" ]]; then
     LIMIT_ARG="--limit $LIMIT"
 fi
 
-mkdir -p "$PROJECT_DIR/logs" "$PROJECT_DIR/results"
+mkdir -p "$PROJECT_DIR/logs" "$PROJECT_DIR/results" "$RUN_DIR"
 cd "$PROJECT_DIR"
 
 echo "Job ID             : $SLURM_JOB_ID"
@@ -53,6 +55,8 @@ echo "Mode               : $MODE"
 echo "Job name           : $JOB_NAME"
 echo "Started at         : $(date)"
 echo "----------------------------------------"
+
+bash "$PROJECT_DIR/scripts/save_system_info.sh" "$SYSTEM_INFO_FILE" "$PYTHON"
 
 $PYTHON "$PROJECT_DIR/main.py" \
     --dataset_path "$DATASET_PATH" \
