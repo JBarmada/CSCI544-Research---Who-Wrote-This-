@@ -5,7 +5,6 @@ import datetime
 from src import config
 from src.data_loader import load_hf_dataset, load_local_dataset
 from src.preprocessor import preprocess_data
-from src.scorer import score_dataframe
 
 
 def parse_args():
@@ -64,7 +63,7 @@ def save_results_json(df_scored, args, threshold, rows_loaded, rows_after_prepro
 
     output = {
         "run": {
-            "timestamp": datetime.datetime.utcnow().isoformat() + "Z",
+            "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
             "source": source_info,
             "sample_size_requested": args.sample,
             "mode": args.mode,
@@ -130,6 +129,8 @@ def main():
         df_scored["binoculars_score"] = None
         df_scored["binoculars_prediction"] = "DRY_RUN"
     else:
+        from src.scorer import score_dataframe
+
         df_scored = score_dataframe(
             df_clean,
             text_column=config.TEXT_COLUMN,

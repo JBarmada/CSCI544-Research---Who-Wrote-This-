@@ -1,4 +1,3 @@
-from datasets import load_dataset
 import pandas as pd
 import os
 
@@ -12,6 +11,8 @@ def load_hf_dataset(dataset_name, split="post_2022", sample_size=None):
         sample_size: If set, load only the first N rows via HF slice syntax (faster than
                      loading the full dataset and then truncating).
     """
+    from datasets import load_dataset
+
     hf_split = f"{split}[:{sample_size}]" if sample_size else split
     print(f"Loading Hugging Face dataset: {dataset_name} (split='{hf_split}')...")
     dataset = load_dataset(dataset_name, split=hf_split)
