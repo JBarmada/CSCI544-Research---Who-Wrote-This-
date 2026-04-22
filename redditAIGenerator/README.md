@@ -62,6 +62,7 @@ Submit a full job with `sbatch`:
 
 ```bash
 sbatch job.sl
+sbatch job_sample.sl
 SAMPLE=128 sbatch job.sl
 SOURCE=local FILE=sample_reddit_pre_2022.csv sbatch job.sl
 ```
