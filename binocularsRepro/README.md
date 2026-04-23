@@ -47,6 +47,26 @@ Analyze a finished run:
 /home1/barmada/.conda/envs/binoculars/bin/python analyze.py --input results/<job_name>
 ```
 
+Run a CC-News diagnostic that stops after model load:
+
+```bash
+STOP_AFTER=model_load sbatch --mem=64G job_diagnostic.sl
+```
+
+Run the same diagnostic at higher memory:
+
+```bash
+STOP_AFTER=model_load sbatch --mem=128G job_diagnostic.sl
+STOP_AFTER=model_load sbatch --mem=192G job_diagnostic.sl
+```
+
+Run later stop-points one at a time:
+
+```bash
+STOP_AFTER=dataset_load sbatch --mem=128G job_diagnostic.sl
+STOP_AFTER=human_pass sbatch --mem=192G job_diagnostic.sl
+```
+
 Watch queue and logs:
 
 ```bash
@@ -140,6 +160,31 @@ Use it when:
 
 - you want the default paper-style full run
 - you want one custom run by overriding env vars at submit time
+
+### `sbatch job_diagnostic.sl`
+
+Purpose:
+
+- submits a diagnostic GPU job without changing the released detector logic
+- records memory checkpoints before and after the major stages
+- can stop after model load, dataset load, or the human scoring pass
+
+Default behavior:
+
+- dataset: CC-News
+- stop point: `model_load`
+- limit: `64`
+- partition: `gpu`
+- gpu: `a40:1`
+- CPUs: `16`
+- memory: `64G`
+- time: `1:00:00`
+
+Use it when:
+
+- you want to isolate where OOM occurs
+- you want one-at-a-time CC-News memory profiling
+- you want `experiments_details.json` and `diagnostic_status.json` even for partial runs
 
 ### `bash scripts/submit_core.sh`
 
@@ -236,6 +281,20 @@ Each completed run writes to `results/<job_name>/`:
   - methodology-grade system snapshot including SLURM vars, `lscpu`, `free -h`, `nvidia-smi`, Python package provenance, and Binoculars import path
 - `analysis.json`
   - produced only after running `analyze.py`
+
+Diagnostic runs also write:
+
+- `diagnostic_status.json`
+  - last successful checkpoint, current status, and latest memory snapshot
+- `experiments_details.json`
+  - includes `memory_checkpoints` for:
+    - process start
+    - before/after model load
+    - after dataset load
+    - after optional limit
+    - before/after human scoring
+    - before/after machine scoring
+    - before final save
 
 ## Troubleshooting
 
