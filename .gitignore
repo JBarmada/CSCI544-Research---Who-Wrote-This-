@@ -29,8 +29,7 @@ data/raw/*
 data/processed/*
 !data/processed/.gitkeep
 
-# Heavy result files (full-dataset JSON dumps are 30+ MB each)
-modularBinoculars/results/full_*_accuracy_rerun.json
+# Future heavy run artifacts — committed report runs are explicitly tracked
 modularBinoculars/results/*_full_*.json
 
 # Logs

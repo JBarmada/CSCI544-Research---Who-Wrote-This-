@@ -1,6 +1,4 @@
-# Heavy full-dataset run artifacts (kept on Drive, not in git)
-results/full_*_accuracy_rerun.json
-results/*_full_*.json
+# Future heavy run artifacts — committed report runs are explicitly tracked below
 results/check_setup_dryrun.json
 
 # Local data — see project Drive folder for canonical copies
