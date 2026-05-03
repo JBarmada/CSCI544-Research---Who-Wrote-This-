@@ -1,11 +1,17 @@
 # Who Wrote This? — Quantifying AI-Generated Text Across Real-World Domains
 
-CSCI 544 (Spring 2026) — Group 56 — final-report code submission.
+CSCI 544 (Spring 2026), Group 56 — final-report code submission. Code + artifacts for the paper [report/finalreport.pdf](report/finalreport.pdf), which scores paired pre-2022 / post-2022 corpora across five domains (Reddit, News, Amazon Reviews, arXiv, Resumes) with the Binoculars detector (Hans et al., 2024) and reports the resulting AI-prevalence shifts.
 
-This repository contains the code, scripts, notebooks, and result artifacts for the report **"Who Wrote This? Quantifying AI-Generated Text Across Multiple Real-World Domains"** ([report/finalreport.pdf](report/finalreport.pdf)). We assemble paired pre-2022 / post-2022 corpora from five domains (Reddit, News, Amazon Reviews, arXiv, Resumes) and measure shifts in AI-generated-text prevalence using the Binoculars detector (Hans et al., 2024).
+📂 **Companion data folder (Google Drive)** — canonical location for all corpora, scored artifacts, and original notebooks (not committed for size reasons): <https://drive.google.com/drive/folders/1Lc-H9QUdukV-Us_R9T4BVwXTGS3Byf66?usp=sharing>
 
-📂 **Companion data folder (Google Drive)**: <https://drive.google.com/drive/folders/1Lc-H9QUdukV-Us_R9T4BVwXTGS3Byf66?usp=sharing>
-The Drive folder is the canonical location for all corpora, scored artifacts, and the raw notebooks. It is intentionally not committed to git (size + speed); the README always points back to it where needed.
+### Submission-guideline quick map
+
+| Guideline item | Where it's answered |
+|---|---|
+| How to set up the environment | [§3](#3-environment-setup) |
+| Device / system used to run the code | [§2](#2-device--system-used-to-run-the-code) |
+| Instructions for running the code | [§5](#5-how-to-run--reproduce-results) |
+| How results are generated | [§6](#6-how-results-are-generated-methodology) (method) + [§8](#8-reported-results-must-match-the-report) (numbers) |
 
 ---
 
@@ -26,9 +32,10 @@ csci544-ai-detection/
 │   ├── parallel-script.py
 │   ├── baselinescript.py
 │   └── reddit_pipeline.ipynb
-├── notebooks/                           # arXiv pipelines (Colab + GPU)
+├── notebooks/                           # Colab notebooks (Colab + GPU)
 │   ├── arxiv_research_articles_dataset.ipynb   # S3 download → LaTeX strip → chunk → Binoculars
-│   └── arxiv_fast_detect_gpt.ipynb             # Fast-DetectGPT cross-check (supporting)
+│   ├── arxiv_fast_detect_gpt.ipynb             # Fast-DetectGPT cross-check (supporting)
+│   └── binoculars_resumes.ipynb                # canonical resume scorer (4-bit NF4 + CPU spillover)
 └── report/
     ├── finalreport.pdf                  # compiled report
     ├── finalreport.tex
@@ -120,16 +127,14 @@ SAMPLE=500 sbatch --account=<your_carc_account> job_sample.sl        # 500-row s
 
 The accuracy threshold `0.9015310749276843` is applied automatically (`src/config.py:20`). Outputs land in `modularBinoculars/results/<name>.json`.
 
-### 5b. News, Amazon Reviews, Resumes — artifact-first
+### 5b. News, Amazon Reviews — artifact-first lookup
 
-The fastest path to the report numbers is to read pre-computed Binoculars-scored artifacts from the Drive folder:
+If you don't need to rerun scoring, the report numbers are already in pre-computed artifacts on the Drive folder. Resumes have their own subsection (§5d).
 
-- **News**: `news_data/news_report_outputs/news_core_summary.csv` → 3.65% pre, 2.37% post (matches Table 1 in the report).
-- **News by domain**: `news_data/news_report_outputs/news_domain_summary.csv`.
-- **Amazon Reviews**: `ReviewData/Processed/processed_2020_2021.txt`, `processed_2022_2023.txt`, plus the GPT-2 control under `Computer Generated/cg_reviews.txt`.
-- **Resumes**: scored CSVs alongside the raw LiveCareer + Tech Resume + LLM-generated resume files in the Drive folder.
+- **News**: `news_data/news_report_outputs/news_core_summary.csv` → 3.65% pre, 2.37% post (Table 1). Per-domain: `news_domain_summary.csv`.
+- **Amazon Reviews**: `ReviewData/{Raw,Processed}/*.txt` + `Computer Generated/cg_reviews.txt` (GPT-2 control).
 
-To re-score these from scratch, see [§5e](#5e-using-modularbinoculars-as-the-shared-scoring-engine-for-any-dataset).
+To re-score either from scratch, see [§5e](#5e-using-modularbinoculars-as-the-shared-scoring-engine-for-any-dataset).
 
 ### 5c. arXiv — Colab + A100
 
@@ -145,7 +150,33 @@ The Fast-DetectGPT notebook (`notebooks/arxiv_fast_detect_gpt.ipynb`) is a suppo
 
 ### 5d. Resumes
 
-Drive-only. The pre-computed scored artifacts under the `gdrive_data` Drive folder reproduce the report numbers. To re-score from raw, follow [§5e](#5e-using-modularbinoculars-as-the-shared-scoring-engine-for-any-dataset) using the same threshold and quantization settings (4-bit NF4 + `torch.float16` for T4).
+The Drive folder's `resumes/` subdirectory contains three files:
+
+| File | Size | Rows | What it is |
+|---|---:|---:|---|
+| `Resume.csv` | 56 MB | 66,016 | Kaggle **LiveCareer** resume corpus (raw pool). Columns: `ID, Resume_str, Resume_html, Category`. The report sampled 1,037 of these. |
+| `tech_resumes_dataset.jsonl` | 17 MB | 3,500 | **Tech Resumes** dataset. `ResumeID` prefixes encode the split: `REAL_*` = 2,337 human, `SYNTH_*` = 1,163 LLM-generated. |
+| `binoculars_eval_data_FINAL.csv` | 1.2 MB | 4,537 | **The exact evaluation input used in the report.** Columns: `Resume_ID, Text_Block, Is_AI, Dataset`. Breakdown: `LiveCareer_DS2` = 1,037 (all human) + `Tech_Resume_DS1` = 2,337 human + 1,163 AI. Total = 4,537, matching "Final Scored: 4,537 summaries" in the report. |
+
+**Two reproduction paths:**
+
+**Path A (canonical — what produced the report numbers):** [`notebooks/binoculars_resumes.ipynb`](notebooks/binoculars_resumes.ipynb). One Colab cell that loads `binoculars_eval_data_FINAL.csv`, scores every row with the official Binoculars library under 4-bit NF4 quantization (`bnb_4bit_compute_dtype=torch.float16`, `bnb_4bit_use_double_quant=True`) and a 12 GiB GPU + 11 GiB CPU memory split, truncates each resume to 2000 chars, checkpoints every 100 rows, and emits `binoculars_FINAL_RESULTS.csv` with `Binoculars_Score`, `Binoculars_Prediction`, `Predicted_Is_AI`. Final cell prints overall accuracy. Runtime ≈ 1–2 hours on a T4.
+
+**Path B (using the shared CLI):** re-score the same file through `modularBinoculars/main.py`:
+
+```bash
+# 1. Download binoculars_eval_data_FINAL.csv from the Drive folder.
+# 2. Rename Text_Block -> text and copy into modularBinoculars/data/raw/:
+python -c "import pandas as pd; pd.read_csv('binoculars_eval_data_FINAL.csv').rename(columns={'Text_Block':'text'}).to_csv('modularBinoculars/data/raw/resumes_eval.csv', index=False)"
+# 3. Score:
+cd modularBinoculars
+python main.py --source local --file resumes_eval.csv --output resumes_scored.json
+# 4. Aggregate flagged-rate per (Dataset, Is_AI) in the output JSON and compare to §8.
+```
+
+Path B uses identical detector parameters but does **not** apply the 2000-char truncation or the resume-specific quantization config from Path A — for tight-VRAM environments use Path A.
+
+The "pre-2022 / post-2022" labels in the §8 results table for resumes are **not temporal** — pre = all 3,374 human resumes (LiveCareer 1,037 + REAL Tech 2,337), post = the 1,163 SYNTH (LLM-generated) Tech resumes. The 33.23% / 10.13% numbers therefore measure (false-positive rate on humans) vs. (recall on LLM resumes), and the −23.1 gap is a domain-specific Binoculars failure mode discussed in the report.
 
 ### 5e. Using `modularBinoculars` as the shared scoring engine for any dataset
 
@@ -181,7 +212,7 @@ python main.py --source local --file news_pre_2022.csv --output news_pre.json
 | Amazon (post) | `ReviewData/Processed/processed_2022_2023.txt` | same | `python main.py --source local --file reviews_post.csv` |
 | Amazon (control) | `ReviewData/Computer Generated/processed_cg_reviews.txt` | same | `python main.py --source local --file reviews_gpt2.csv` — should reproduce ≈98.8% AI-flagged |
 | arXiv (re-score) | chunked CSVs from `notebooks/arxiv_research_articles_dataset.ipynb` cells 11–17 | rename to `text` | `python main.py --source local --file arxiv_dec2021_chunks.csv` |
-| Resumes | LiveCareer + Tech + LLM resume CSVs from Drive | rename summary→text, drop <15-word rows | `python main.py --source local --file resumes_pre.csv` |
+| Resumes | `resumes/binoculars_eval_data_FINAL.csv` (Drive) — already merged + filtered (4,537 rows) | rename `Text_Block` → `text` | `python main.py --source local --file resumes_eval.csv` (then group by `Dataset`/`Is_AI`) |
 
 The scorer parameters (Falcon-7B / Falcon-7B-Instruct, threshold `0.9015310749276843`, batch 8) are baked in via `src/config.py`, so re-scoring is guaranteed to use identical detector settings to the report.
 
@@ -211,7 +242,7 @@ Mirrors the report's methodology section so the README maps directly onto the .t
 | arXiv (raw → scored) | `notebooks/arxiv_research_articles_dataset.ipynb` | Drive + AWS S3 (requester-pays) | Colab + A100 only | End-to-end pipeline (S3 download → LaTeX strip → chunk → score) requires Colab + user-supplied keys. |
 | arXiv (re-score chunks) | `modularBinoculars/` | Drive `arxiv/processed/*` | **Yes via [§5e](#5e-using-modularbinoculars-as-the-shared-scoring-engine-for-any-dataset)** | If you only need to reproduce the scoring step, feed the pre-chunked CSVs to `main.py`. |
 | arXiv (FastDetectGPT) | `notebooks/arxiv_fast_detect_gpt.ipynb` | Drive | Partial | Comparative cell expects 2021 scoring that is commented out; re-enable before running. |
-| Resumes | `modularBinoculars/` (re-score) | Drive only | **Yes via [§5e](#5e-using-modularbinoculars-as-the-shared-scoring-engine-for-any-dataset)** | Rename summary→text, drop <15-word rows, then `main.py --source local`. |
+| Resumes | `notebooks/binoculars_resumes.ipynb` (canonical) **or** `modularBinoculars/` (re-score) | Drive `resumes/` | **Yes** | Path A (the notebook) reproduces the report numbers exactly with the resume-specific 4-bit NF4 quantization. Path B re-scores via the CLI; see §5d. |
 
 ---
 
@@ -223,7 +254,9 @@ Mirrors the report's methodology section so the README maps directly onto the .t
 | News | 3.65% | 2.37% | −1.28 | 17,679 / 16,784 |
 | Amazon Reviews | 16.5% | 15.23% | −1.27 | 1,000 / 1,000 |
 | arXiv | 0.1% | 0.2% | +0.1 | 10,000 / 10,000 |
-| Resumes | 33.23% | 10.13% | −23.10 | 3,374 / 1,163 |
+| Resumes † | 33.23% | 10.13% | −23.10 | 3,374 / 1,163 |
+
+† Resumes are not split temporally. "Pre-2022" = 3,374 human resumes (1,037 LiveCareer + 2,337 REAL Tech); "Post-2022" = 1,163 SYNTH (LLM-generated) Tech resumes. The 33.23% / 10.13% are therefore (false-positive rate on humans) vs. (recall on LLM resumes); see §5d for the underlying file structure.
 
 Plus controls: GPT-2 Amazon reviews 98.8% flagged (987/999); LLM-rewritten resumes 100% recall; Gemma-2-2B paraphrased news 42.47% flagged (7,499/17,658).
 
