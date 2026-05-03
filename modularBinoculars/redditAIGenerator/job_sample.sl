@@ -7,7 +7,7 @@
 #SBATCH --time=01:00:00
 #SBATCH --output=logs/reddit_ai_sample_%j.out
 #SBATCH --error=logs/reddit_ai_sample_%j.err
-#SBATCH --account=snazaria_1817
+#SBATCH --account=your_carc_account
 
 # =============================================================================
 # job_sample.sl — sbatch job for sample Reddit AI generation runs
@@ -18,7 +18,7 @@
 #   SAMPLE=32 SOURCE=local FILE=sample_reddit_pre_2022.csv sbatch job_sample.sl
 # =============================================================================
 
-PYTHON=${PYTHON:-/home1/barmada/.conda/envs/reddit-ai-gen/bin/python}
+PYTHON=${PYTHON:-$(which python)}
 
 SOURCE=${SOURCE:-hf}
 DATASET=${DATASET:-validname/reddit-ai-detection-english-80k}

@@ -44,7 +44,7 @@ bash scripts/submit_core.sh
 Analyze a finished run:
 
 ```bash
-/home1/barmada/.conda/envs/binoculars/bin/python analyze.py --input results/<job_name>
+${BINO_PYTHON:-$(which python)} analyze.py --input results/<job_name>
 ```
 
 Run a CC-News diagnostic that stops after model load:
@@ -311,5 +311,5 @@ If you need to inspect the installed package source directly:
 
 ```bash
 git -C .upstream/Binoculars rev-parse HEAD
-/home1/barmada/.conda/envs/binoculars/bin/python -c "import binoculars; print(binoculars.__file__)"
+${BINO_PYTHON:-$(which python)} -c "import binoculars; print(binoculars.__file__)"
 ```

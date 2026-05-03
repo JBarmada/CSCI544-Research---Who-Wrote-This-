@@ -7,19 +7,24 @@
 #SBATCH --time=24:00:00
 #SBATCH --output=logs/full_%j.out
 #SBATCH --error=logs/full_%j.err
-#SBATCH --account=snazaria_1817
+## Account: edit the line below or override on the command line with
+##   sbatch --account=<your_carc_account> job.sl
+## (For reproduction by the original authors on USC CARC, use the lab account.)
+#SBATCH --account=your_carc_account
 
 # =============================================================================
 # job.sl — sbatch job for full dataset runs
 #
 # Submit with:
-#   sbatch job.sl                              # full dataset, post_2022 split
-#   SPLIT=pre_2022 sbatch job.sl              # pre_2022 split
-#   MODE=low-fpr sbatch job.sl                # low-fpr threshold
-#   OUTPUT=my_results.json sbatch job.sl      # custom output name
+#   sbatch --account=<acct> job.sl                              # full dataset, post_2022 split
+#   SPLIT=pre_2022 sbatch --account=<acct> job.sl               # pre_2022 split
+#   MODE=low-fpr sbatch --account=<acct> job.sl                 # low-fpr threshold
+#   OUTPUT=my_results.json sbatch --account=<acct> job.sl       # custom output name
 # =============================================================================
 
-PYTHON="/home1/barmada/.conda/envs/binoculars/bin/python"
+# Path to the python interpreter inside your conda env.
+# Override on submission with:  BINO_PYTHON=/path/to/python sbatch ... job.sl
+PYTHON="${BINO_PYTHON:-$(which python)}"
 
 SPLIT=${SPLIT:-post_2022}
 MODE=${MODE:-accuracy}

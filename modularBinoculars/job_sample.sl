@@ -7,19 +7,24 @@
 #SBATCH --time=01:00:00
 #SBATCH --output=logs/sample_%j.out
 #SBATCH --error=logs/sample_%j.err
-#SBATCH --account=snazaria_1817
+## Account: edit the line below or override on the command line with
+##   sbatch --account=<your_carc_account> job_sample.sl
+## (For reproduction by the original authors on USC CARC, use the lab account.)
+#SBATCH --account=your_carc_account
 
 # =============================================================================
 # job_sample.sl — sbatch job for sample runs
 #
 # Submit with:
-#   sbatch job_sample.sl                          # 100-row sample (default)
-#   SAMPLE=500 sbatch job_sample.sl               # 500-row sample
-#   SAMPLE=100 SPLIT=pre_2022 sbatch job_sample.sl
-#   SAMPLE=1000 MODE=low-fpr sbatch job_sample.sl
+#   sbatch --account=<acct> job_sample.sl                          # 100-row sample (default)
+#   SAMPLE=500 sbatch --account=<acct> job_sample.sl               # 500-row sample
+#   SAMPLE=100 SPLIT=pre_2022 sbatch --account=<acct> job_sample.sl
+#   SAMPLE=1000 MODE=low-fpr sbatch --account=<acct> job_sample.sl
 # =============================================================================
 
-PYTHON="/home1/barmada/.conda/envs/binoculars/bin/python"
+# Path to the python interpreter inside your conda env.
+# Override on submission with:  BINO_PYTHON=/path/to/python sbatch ... job_sample.sl
+PYTHON="${BINO_PYTHON:-$(which python)}"
 
 # Configurable via env vars; fall back to defaults
 SAMPLE=${SAMPLE:-100}

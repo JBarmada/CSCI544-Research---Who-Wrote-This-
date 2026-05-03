@@ -5,7 +5,7 @@ set -euo pipefail
 PINNED_COMMIT="c8ae2f90d50ee696418bc71d8d9e5020e5f9d7b8"
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 UPSTREAM_DIR="${UPSTREAM_DIR:-$PROJECT_DIR/.upstream/Binoculars}"
-PYTHON="${PYTHON:-/home1/barmada/.conda/envs/binoculars/bin/python}"
+PYTHON="${PYTHON:-${BINO_PYTHON:-$(which python)}}"
 DATASET_PATH="${DATASET_PATH:-$UPSTREAM_DIR/datasets/core/cc_news/cc_news-llama2_13.jsonl}"
 HUMAN_SAMPLE_KEY="${HUMAN_SAMPLE_KEY:-text}"
 MACHINE_SAMPLE_KEY="${MACHINE_SAMPLE_KEY:-meta-llama-Llama-2-13b-hf_generated_text_wo_prompt}"
@@ -23,7 +23,7 @@ salloc \
     --cpus-per-task=4 \
     --mem=16G \
     --time=00:15:00 \
-    --account=snazaria_1817 \
+    --account=your_carc_account \
     bash -lc "
         set -euo pipefail
         module purge >/dev/null 2>&1 || true

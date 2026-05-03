@@ -10,14 +10,14 @@
 # =============================================================================
 
 PROJECT_DIR=$(pwd)
-PYTHON="/home1/barmada/.conda/envs/binoculars/bin/python"
+PYTHON="${BINO_PYTHON:-$(which python)}"
 
 salloc \
     --partition=debug \
     --cpus-per-task=4 \
     --mem=16G \
     --time=00:15:00 \
-    --account=snazaria_1817 \
+    --account=your_carc_account \
     bash -c "
         echo '========================================'
         echo ' Binoculars Setup Check'

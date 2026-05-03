@@ -1,19 +1,19 @@
 #!/bin/bash
-#SBATCH --job-name=bino-sample
+#SBATCH --job-name=bino-diag
 #SBATCH --partition=gpu
 #SBATCH --gres=gpu:a40:1
-#SBATCH --cpus-per-task=8
-#SBATCH --mem=32G
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=64G
 #SBATCH --time=01:00:00
-#SBATCH --output=logs/sample_%j.out
-#SBATCH --error=logs/sample_%j.err
-#SBATCH --account=snazaria_1817
+#SBATCH --output=logs/diag_%j.out
+#SBATCH --error=logs/diag_%j.err
+#SBATCH --account=your_carc_account
 
 set -euo pipefail
 
 PROJECT_DIR="${SLURM_SUBMIT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}"
 UPSTREAM_DIR="${UPSTREAM_DIR:-$PROJECT_DIR/.upstream/Binoculars}"
-PYTHON="${PYTHON:-/home1/barmada/.conda/envs/binoculars/bin/python}"
+PYTHON="${PYTHON:-${BINO_PYTHON:-$(which python)}}"
 export OPENBLAS_NUM_THREADS="${OPENBLAS_NUM_THREADS:-1}"
 export OMP_NUM_THREADS="${OMP_NUM_THREADS:-1}"
 export MKL_NUM_THREADS="${MKL_NUM_THREADS:-1}"
@@ -23,6 +23,7 @@ export PYTHONNOUSERSITE="${PYTHONNOUSERSITE:-1}"
 unset PYTHONPATH
 unset PYTHONHOME
 
+STOP_AFTER="${STOP_AFTER:-model_load}"
 LIMIT="${LIMIT:-64}"
 DATASET_PATH="${DATASET_PATH:-$UPSTREAM_DIR/datasets/core/cc_news/cc_news-llama2_13.jsonl}"
 DATASET_NAME="${DATASET_NAME:-CC-News}"
@@ -32,7 +33,7 @@ MACHINE_TEXT_SOURCE="${MACHINE_TEXT_SOURCE:-LLaMA-2-13B}"
 TOKENS_SEEN="${TOKENS_SEEN:-512}"
 BATCH_SIZE="${BATCH_SIZE:-32}"
 MODE="${MODE:-accuracy}"
-DEFAULT_JOB_NAME="sample-${DATASET_NAME}-${LIMIT}"
+DEFAULT_JOB_NAME="diag-${STOP_AFTER}-${DATASET_NAME}-${TOKENS_SEEN}-tokens"
 if [[ -n "${SLURM_JOB_ID:-}" ]]; then
     DEFAULT_JOB_NAME="${DEFAULT_JOB_NAME}-job${SLURM_JOB_ID}"
 fi
@@ -44,8 +45,17 @@ mkdir -p "$PROJECT_DIR/logs" "$PROJECT_DIR/results" "$RUN_DIR"
 cd "$PROJECT_DIR"
 
 echo "Job ID             : $SLURM_JOB_ID"
-echo "Sample limit       : $LIMIT"
+echo "Node               : $SLURMD_NODENAME"
+echo "Stop after         : $STOP_AFTER"
 echo "Dataset path       : $DATASET_PATH"
+echo "Human key          : $HUMAN_SAMPLE_KEY"
+echo "Machine key        : $MACHINE_SAMPLE_KEY"
+echo "Machine source     : $MACHINE_TEXT_SOURCE"
+echo "Tokens seen        : $TOKENS_SEEN"
+echo "Batch size         : $BATCH_SIZE"
+echo "Limit              : $LIMIT"
+echo "Mode               : $MODE"
+echo "Job name           : $JOB_NAME"
 echo "Started at         : $(date)"
 echo "----------------------------------------"
 
@@ -61,7 +71,8 @@ $PYTHON "$PROJECT_DIR/main.py" \
     --batch_size "$BATCH_SIZE" \
     --mode "$MODE" \
     --job_name "$JOB_NAME" \
-    --limit "$LIMIT"
+    --limit "$LIMIT" \
+    --stop_after "$STOP_AFTER"
 
 echo "----------------------------------------"
 echo "Finished at        : $(date)"

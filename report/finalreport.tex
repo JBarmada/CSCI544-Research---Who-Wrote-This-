@@ -1,0 +1,369 @@
+\documentclass[11pt]{article}
+
+% Use the official ACL Rolling Review / *ACL template in Overleaf.
+% For a class final report, "final" is usually the right mode because it
+% shows author names and removes review markup.
+\usepackage[final]{acl}
+
+\usepackage{times}
+\usepackage{latexsym}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{microtype}
+\usepackage{inconsolata}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{multirow}
+\usepackage{amsmath}
+\usepackage{xspace}
+\usepackage{xcolor}
+
+\newcommand{\TODO}[1]{\textcolor{red}{\textbf{TODO:} #1}}
+
+\title{Who Wrote This?\\
+Quantifying AI-Generated Text Across Multiple Real-World Domains}
+
+\author{
+  Mostafa Dewidar \\
+  \texttt{dewidar@usc.edu}
+  \And
+  Jad Barmada \\
+  \texttt{barmada@usc.edu}
+  \And
+  Conner Nguyen \\
+  \texttt{connerng@usc.edu}
+  \And
+  Anay Mody \\
+  \texttt{anaymody@usc.edu}
+  \And
+  Ryan Angle \\
+  \texttt{rangle@usc.edu}
+}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+% Keep this to one paragraph.
+% Abstract checklist:
+% (1) motivation and problem
+% (2) main idea / overall approach
+% (3) main contribution(s)
+% (4) key result(s)
+% (5) takeaway
+AI-generated text is increasingly mixed with human-written content online, but
+measuring that shift in realistic settings remains difficult because current
+detectors are often domain-sensitive, source-model sensitive, only work on Open-weight models, or have other issues that leave them with very high false-positive or false negative rates.  We studied the effectiveness of the AI detection model Binoculars
+using paired pre-2022 and post-2022 corpora across five domains: Reddit, News, Amazon reviews, arXiv papers, and Resumes. Our results found that Binoculars seemed to show little difference between the pre-2022 and post-2022 datasets while being inconsistent in its ability to detect across different domains. This implies that future work needs to be done to study how each domain is detected differently and potentially explore other solutions of AI detection.
+% As a by-product of this work, We proposed and tested a new method for AI- detection, "Just Ask", that achieves >0.95 AUROC on the evaluation dataset. However, In this paper, we focus on the results of these open source methods and leave "Just Ask" as a future research direction.
+\end{abstract}
+
+\section{Introduction}
+% Introduction guidance:
+% A few paragraphs introducing and framing the work.
+% If useful, follow the common four-paragraph plan:
+% (1) high-level context
+% (2) specific problem and why it matters
+% (3) main idea / method and why it is reasonable
+% (4) key results and takeaways
+Large language models (LLMs) have changed the authorship landscape of online
+text~\citep{brown2020gpt3}. Posts, reviews, news summaries, academic writing,
+and professional documents can now be partially or fully machine generated,
+which raises both practical and scientific questions about how much synthetic
+text already appears in the wild and whether current detectors can measure it
+reliably across domains.
+
+Our project approaches this as a cross-domain measurement problem. We sought to discover the prevalence of AI-generated text across domains in which it may be both present and potentially very important to measure. In doing so, we evaluate how detector outputs vary across domains and time, and whether these signals reflect true shifts in authorship or are driven by domain-specific writing styles and structures.
+
+\section{Related Work}
+% Related work guidance:
+% Discuss relevant papers and compare them to your work.
+% Avoid just listing prior work; explain how each differs from or motivates
+% your approach.
+\noindent AI-generated text detection has been studied through both supervised
+classification and zero-shot scoring methods. In this project, Binoculars is
+the most relevant baseline because it can be applied across domains without
+training domain-specific classifiers~\citep{hans2024binoculars}. At the same
+time, detector performance is known to vary under domain shift, editing, and
+changes in writing style, which makes naturally occurring web text a useful
+stress test for detection pipelines rather than a clean benchmark. With that being said, we would expect Binoculars to perform well in the news domain, for example, considering its heavy reliance on CC-NEWS data in its training process~\citep{hans2024binoculars}.
+
+% Potential included for Anay, but not actually a paper
+%In the context of professional branding, templated human writing tends to mimic the rigid structures often favored by LLMs. As job seekers increasingly leverage LLMs to generate and polish their resumes and cover letters, this domain presents a challenge for detectors like Binoculars, which may penalize this formulaic corporate writing style.
+
+
+\section{Problem Description}
+% Problem description guidance:
+% Carefully define the problem the project is trying to solve.
+% Make the setup precise enough that the reader understands the goal,
+% assumptions, and what is being measured.
+The purpose of the project is to try to estimate and characterize the proliferation of AI generated text across different domains. To do so, we collect data from 2 different time period, before 2022, and post 2022. knowing that commercial LLMs didn't exist before 2021, we assume 2021 as a baseline to calibrate for any systematic errors. We then assume the shift in AI-detection scores is the extent to which AI generation use increased in the post-LLM or post-2022 era. 
+
+Formally, let $D = \{d_1, \dots, d_k\}$ denote the set of domains. For each
+domain $d$, we construct a pre-2022 corpus $X^{\text{pre}}_d$ and a post-2022
+corpus $X^{\text{post}}_d$. We apply one or more detectors $f(\cdot)$ to both
+corpora and compare score distributions and positive rates:
+\[
+\Delta_d = \mathbb{E}_{x \sim X^{\text{post}}_d}[f(x)] -
+\mathbb{E}_{x \sim X^{\text{pre}}_d}[f(x)].
+\]
+
+A key complication is that detector outputs may reflect genre, length, or
+platform-specific style rather than true authorship. Another complication we encountered is that available open-source detectors (like Binoculars and fast-detect GPT) can have very low accuracy on datasets other than the ones they were originally tested on. 
+
+\section{Methods}
+% Methods guidance:
+% Describe each method precisely enough that another researcher could reproduce
+% it. Include dataset details, preprocessing, and implementation choices that
+% materially affect the analysis.
+\subsection{Reddit Dataset and Preprocessing}
+Across the project, each domain is split into pre-2022 and post-2022 corpora
+so detector outputs can be compared against an older baseline and a modern
+corpus. For Reddit, data was collected from the Pushshift archive using the
+top-40k-subreddit dump packaged by u/Watchful1 and hosted on Academic
+Torrents. The final Reddit dataset targets roughly 80k records split evenly
+between pre-2022 and post-2022 text, with temporal stratification and
+subreddit-level domain labels to preserve both historical coverage and topical
+diversity. Sampling used reservoir sampling within domain--year-bucket cells
+to avoid over-representing posts that appear early in the archive.
+
+Both submissions and comments were included, using \texttt{selftext} and
+\texttt{body} respectively. Preprocessing was intentionally non-destructive:
+HTML entities were decoded, zero-width characters and bare URLs were removed,
+whitespace was normalized, English filtering was applied, and exact
+deduplication was performed. Records shorter than 50 words or longer than
+1,500 words were removed. The final metadata retained subreddit, domain, post
+type, year, word count, length bin, Reddit score, creation timestamp, and
+item ID. Additional Reddit construction detail, including year-bucket
+allocation and dataset-specific limitations, is provided in the appendix.
+
+\subsection{News Dataset and Preprocessing}
+News data was sourced using the CC-NEWS subset of Common Crawl to sample articles from a curated set of news domains across pre-2022 and post-2021 time periods. Articles were extracted and stored at the month level by randomly sampling across crawl iterations for a given month and then converted into Binoculars-ready text chunks.
+
+Following article extraction, article text was retained with punctuation and casing preserved while empty entries, failed extractions, entries with less than 50 words, non-English entries when detected, and exact duplicates were removed. We focused on English domains for consistency with findings of the Binoculars paper. The final scored news corpus contained 17,679 pre-2022 examples and 16,784 post-2021 examples across 48 pre months and 50 post months.
+
+\subsection{Reviews Dataset and Preprocessing}
+The product reviews were sourced from the UCSD Amazon Reviews dataset which contains reviews up to 2023. 20k reviews were sampled from within 2 years before 2022, and 20k reviews were sampled from reviews after 2022. The control group of computer generated reviews were sourced from the "Fake Reviews Dataset" on Kaggle. These reviews were generated in 2022 using GPT-2.
+
+After sourcing the data, they were run through preprocessing scripts that removed features such as multimedia content and URLs, normalized and collapsed punctuation and whitespace, and discarded reviews that were either empty or too short. Then 1k reviews out of the 20k reviews were sampled for each Binoculars run due to hardware limitations not allowing for all 20k reviews to be processed.
+
+\subsection{Resume Dataset and Preprocessing}
+For the professional branding domain, data was sourced from two collections: a Tech Resumes dataset comprising 2,337 human-written and 1,163 LLM-generated resumes, and a LiveCareer dataset containing 1,037 pre-LLM human resumes to serve as an older baseline. 
+
+Because LLM detectors evaluate the predictability of sequences, they often struggle with bulleted lists. Therefore, preprocessing targeted the continuous-text ``Summary'' section of each document via regular expressions. Extraneous formatting and whitespace were normalized, and any summaries under 15 words were dropped to ensure a sufficient context window for cross-perplexity calculations. The final dataset yielded 4,537 cleanly parsed summaries.
+
+\subsection{arXiv Dataset and Preprocessing}
+We collected 10,000 papers published on arxiv in December 2021, as well as 10,000 papers published in December 2025. We used the open arxiv API through provided through amazon s3 to collect the LaTeX source of all the papers. We then stripped all the papers of their LaTeX tags, and used random sampling to sample a 250 word chunk from each section of the paper. We made sure the chunk always started at the start of a sentence and sampled words beyond 250 when 250 wasn't the end of a sentence. We made sure that each chunk is at least 250 words as detecting AI-generated content is highly dependent on sequence length. if an AI generated 1 or 2 words, there are no patterns or information in the sequence to be observed by a detector and research from Binoculars and others suggest that there is no detection advantage to be gained by increasing the sequence length beyond 256 tokens.
+
+\section{Experimental Results}
+% Experimental results guidance:
+% Present results using tables or figures where helpful.
+% Accompany every quantitative result with text that interprets the findings.
+% Experimental configuration details that are not central can also appear here.
+\subsection{Main Cross-Domain Results}
+Table~\ref{tab:main-results} summarizes the currently available domain-level
+results. 
+
+
+\begin{table*}[t]
+    \centering
+    \small
+    \begin{tabular}{lcccc}
+        \toprule
+        Domain & Pre-2022 Size & Post-2022 Size & Main Metric & Key Gap \\
+        \midrule
+        Reddit & 38,871 & 39,991 & 10.09\% vs.\ 8.47\% AI flagged & -1.62 pts \\
+        News & 17,679 & 16,784 & 3.65\% vs. 2.37\% & -1.28 pts \\
+        Amazon Reviews & 1,000 & 1,000 & 16.5\% vs.\ 15.2\% AI flagged & -1.3 pts \\
+        arXiv & 10000 & 10000 & 0.1\% vs 0.2\% & +0.1 pts\\
+        Resumes & 3,374 & 1,163 & 33.23\% vs.\ 10.13\% AI flagged & -23.1 pts \\
+        \bottomrule
+    \end{tabular}
+    \caption{Current cross-domain comparison table. Reddit and Amazon entries
+    are populated from available results; }
+    \label{tab:main-results}
+\end{table*}
+
+\begin{table}[t]
+    \centering
+    \small
+    \setlength{\tabcolsep}{4pt}
+    \begin{tabular}{lp{0.18\linewidth}p{0.21\linewidth}p{0.28\linewidth}}
+        \toprule
+        Domain & Date Range & Examples & Notes \\
+        \midrule
+        Reddit & 2005--2025 & 78,862 scored & Pushshift Reddit corpus with domain and year stratification \\
+        News & 2018-2026 & 34,463 scored & Common Crawl CC-NEWS corpus, pre/post split with month-level files \\
+        Amazon & 2020--2023 & 2,000 + 1,000 control & Binoculars rates reported in text \\
+        arXiv & Dec 2021 and Dec 2025 & 20,000 total & collected directly from arxiv API \\
+        Resumes & 2021--2025 & 4,536 scored & Evaluated on ``Summary'' sections $\ge$ 15 words \\
+        \bottomrule
+    \end{tabular}
+    \caption{Current dataset summary. The Reddit row reflects the recovered
+    Binoculars runs; the remaining incomplete rows are assigned to dataset
+    owners.}
+    \label{tab:data-summary}
+\end{table}
+
+\subsection{Reddit Results}
+The Reddit Binoculars runs cut against a simple prevalence narrative. In the
+pre-2022 split, Binoculars flags 3,923 of 38,871 records as AI generated
+(10.09\%), compared with 3,387 of 39,991 records (8.47\%) in the post-2022
+split. If Binoculars were primarily measuring the emergence of modern
+LLM-written Reddit content, the expected direction would be the reverse.
+
+The strongest supporting patterns point to composition and style effects.
+Submissions are flagged more often than comments in both eras (16.03\% vs.\
+9.65\% pre-2022; 13.76\% vs.\ 8.37\% post-2022), and short texts are flagged
+much more often than long texts in both splits. Most large subreddit and
+domain slices also decrease rather than increase after 2022. Taken together,
+these results suggest that Binoculars is highly sensitive to Reddit-specific
+register differences such as post type, text length, and community genre,
+which makes the detector useful as a stress test but limits its value as a
+direct prevalence estimator. 
+
+\subsection{ArXiv Results}
+Binoculars showed no meaningful increase in AI usage patterns between 2021 and 2025 paper chunks. Recording 0.1\% AI detection on 2021 paper chunks and 0.2\% AI detection on 2025 paper chunks using the score threshold recommended by the original paper (well withing the realm of noise and not a statistically significant difference). You can see different results for different thresholds in the table below:
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lccc}
+\toprule
+\textbf{Threshold} & \textbf{2021 AI \%} & \textbf{2025 AI \%} & \textbf{Difference} \\
+\midrule
+0.7500 &  0.0\% &  0.0\% & +0.0pp \\
+0.8000 &  0.0\% &  0.0\% & +0.0pp \\
+0.8500 &  0.1\% &  0.1\% & +0.1pp \\
+0.9000 &  0.9\% &  1.4\% & +0.5pp \\
+0.9015 &  1.0\% &  1.4\% & +0.5pp \\
+0.9500 & 11.7\% & 11.3\% & $-$0.4pp \\
+1.0000 & 48.8\% & 44.4\% & $-$4.4pp \\
+1.0500 & 90.4\% & 85.9\% & $-$4.5pp \\
+1.1000 & 99.4\% & 98.6\% & $-$0.9pp \\
+\bottomrule
+\end{tabular}
+\caption{Binoculars detection rates on arXiv at multiple thresholds (n=1,000 per period). Detection rates remain nearly identical across all thresholds, indicating fundamentally inseparable score distributions.}
+\label{tab:binoculars-thresholds}
+\end{table}
+
+This prompted us to create a positive-control dataset of AI content that is generated by asking different AI models to re-write, expand, or polish pre-2022 paper chunks. While Binoculars should detect the majority of these chunks as AI-generated, it in fact only detected a very small percentage of them as such. It also lost detection ability when it came to human-written content that was polished by an LLM. We used GPT-4o, the most popular LLM from the period 6 months prior to the publication of the Binoculars paper, to generate the positive control data so as account for potential dependence on the source LLM, but Binoculars still failed to detect the vast majority of chunks as shown in the figure.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{latex/Screenshot 2026-04-24 at 5.57.55 PM.png}
+\caption{Binoculars fails to identify majority of AI-rewritten chunks}
+\label{fig:Binoculars results on AI-rewritten paper chunks}
+\end{figure}
+
+This could show the difficulty of the task of AI text detection. It can also show that some existing  methods have limitations based on domain, time-period, source-LLM, text alterations. This result prompted us to experiment with our own detection methods until we arrived at a simple, novel method which was able to correctly classify positive control data. We discuss this method in future work.
+
+\subsection{Amazon Review Results}
+
+For the Amazon Reviews, Binoculars detected 165 out of 1000 reviews were AI generated in the pre-2022 split (16.5\%). For the post-2022 split, Binoculars detected 152 out of 998 reviews were AI generated (15.23\%). Due to the growing prevalence of LLMs post-2022, the expectation would be that post-2022 would be higher. Additionally, if we operate off of the assumption that pre-2022 would only contain non-AI reviews, then that implies an undesirable false positive rate of 16.5\% in the pre-2022 dataset.
+
+When ran on a sample machine generated dataset from 2022 using GPT-2, Binoculars had a detection 987 out of 999 reviews (98.8\%). This high detection rate does display promise in Binoculars' ability to detect machine generated content, but it doesn't necessarily prove its ability to detect modern LLMs due to this dataset being sourced before the release of ChatGPT.
+
+\subsection{News Results}
+In the news split, Binoculars flagged 645 of 17,679 pre-2022 examples as AI-generated (3.65\%), compared with 398 of 16,784 post-2022 examples (2.37\%). This corresponds to a gap of -1.28 percentage points. One might expect the post-2022 dataset to contain more AI-generated chunks due to the introduction of LLMs as prevoiously mentioned, which calls into question the capability of the detector used. With that being said, direction and magnitude of this gap should be interpreted cautiously because the detector may be sensitive to news style, article length, publisher mix, and month-level composition rather than solely true authorship.
+
+On the paraphrased news dataset generated by Gemma-2-2B, Binoculars flags 7,499 of 17,658 samples (42.47\%) as AI-generated, while a majority (57.53\%) are still classified as human. Despite this, the mean Binoculars score of 0.9123 lies above the detector’s decision threshold indicating that, paraphrased texts are marginally positioned on the AI side of the boundary on average. This divergence between the mean score and the classification rate suggests that many paraphrased samples cluster in and around the threshold used both by us and the Binoculars paper, reflecting at least partial retention of human-like properties even after generation. Especially compared to the overwhelming rate at which the Binoculars detector flagged true AI-generation in the Reviews domain, these results support the hypothesis that paraphrasing seems to weaken detector signals.
+
+\subsection{Resume Results}
+In the resume domain, Binoculars achieved perfect 100\% true positive recall on the 1,163 synthetic tech resumes. Furthermore, 0\% of the 2,337 human-written tech resumes were falsely flagged. However, the detector falsely flagged 10.1\% of the human-written LiveCareer resumes. A qualitative review reveals that these false positives occur in highly polished summaries dense with buzzwords (e.g., ``Dedicated Customer Service Manager with 15+ years''). This highlights how specific structures and corporate jargon can trick detectors into labeling human text as machine generated.
+
+
+\subsection{Experimental Configuration}
+For the Reddit, Amazon Reviews, and News Binoculars runs, the detector used the Falcon-7B /
+Falcon-7B-Instruct pair in accuracy mode with the standard threshold
+0.9015310749276843 and a batch size of 8. Additional run details are included
+in the appendix.
+
+For the resume pipeline, Binoculars was instantiated with 4-bit quantization (\texttt{nf4}) and \texttt{torch.float16} compute types to accommodate memory constraints. Device mapping with CPU spillover (\texttt{max\_memory}) was utilized to evaluate the 4,537 records on a T4 GPU without fragmentation errors.
+for arxiv, we used an A100 through colab, using the same threshold 0.901 and same batch size and configuration.
+
+\section{Conclusion and Future Work}
+% Conclusion guidance:
+% Summarize the key takeaways and describe possible follow-up work.
+The current state of the project supports one strong shared conclusion:
+authorship detection behaves differently across domains and cannot be treated
+as a plug-and-play prevalence meter. The Reddit analysis makes this especially
+clear, because the post-2022 Reddit split is flagged less often than the
+pre-2022 split even though the opposite trend would be expected under a simple
+``more modern AI content after 2022'' hypothesis.
+
+Future work in the full paper should compare whether this same instability
+appears in the other domains. Future work would also include a new detection method that achieves better generalization across domains and the results that yields for AI-prevelance across domains. 
+
+
+\section*{Limitations}
+Our methodology relies on the assumption that pre-2022 corpora are a reasonable
+proxy for human-authored text, which is useful but imperfect. Detector outputs
+may also reflect stylistic differences unrelated to machine authorship, and
+closed-source tools make it difficult to diagnose failure modes. Finally, our
+results should be interpreted as empirical estimates conditioned on the chosen
+datasets and detectors, not as ground-truth measurements of the full internet.
+The Amazon experiments also show that strong performance on older generated
+text such as GPT-2 reviews does not automatically imply robust detection of
+newer LLM outputs in realistic datasets.
+
+\section*{Ethics Statement}
+AI authorship detection can affect high-stakes decisions in education, hiring,
+and platform moderation, so false positives are a serious concern. Our goal is
+to study aggregate trends rather than to make punitive judgments about specific
+individuals. We view our results as domain-level measurements with clear uncertainty and caveats.
+
+\bibliography{refs}
+\bibliographystyle{acl_natbib}
+
+\appendix
+\section{Individual Contributions}
+% Individual contributions guidance:
+% List what each group member contributed. This section does not count toward
+% the main page limit.
+% This section does not count toward the report length per the course note.
+\begin{itemize}
+    \item \textbf{Mostafa Dewidar:} Collected and pre-processed arxiv data. setup Binoculars pipeline for use across domains, Experimented with fast-detect GPT, conducted positive control assessments of detector and built the new detection method for future work.
+    \item \textbf{Conner Nguyen:} Led the Amazon review analysis, ran
+    Binoculars on pre-2022 and post-2022 review samples, evaluated a
+    GPT-2-generated positive-control dataset, and summarized the implications
+    of these results for false positives and modern-model detection limits.
+    \item \textbf{Anay Mody:} Collected and preprocessed the resume datasets (Tech and LiveCareer), implemented regular expression pipelines to extract continuous-text summaries, managed the GPU deployment using 4-bit quantization to prevent memory constraints, and analyzed the false-positive rates associated with templated professional writing.
+    \item \textbf{Ryan Angle:} Collected news data through CC-NEWS, wrote a standalone cleaning pipeline specific to news data, ran news data through binoculars, wrote a script using Gemma-2-2B to paraphrase pre-2022 news articles and ran that data through Binoculars for false-negative to false-positive comparison.
+\end{itemize}
+
+\section{Optional Appendix}
+% Optional appendix guidance:
+% Additional text, tables, or figures can go here after the references.
+% Appendix content does not count toward the main page limit.
+\subsection{Reddit Dataset Details}
+The Reddit dataset targeted 80,000 total records split evenly into
+\texttt{pre\_2022} and \texttt{post\_2022} corpora. The temporal allocation was
+non-uniform by design: the pre-2022 split emphasized 2019--2021 while still
+retaining earlier historical coverage, and the post-2022 split emphasized 2023
+and 2024 while also including 2022 and 2025. Domain labels were assigned at
+the subreddit level, with subreddits grouped into technology, science,
+finance, entertainment, news, sports, and lifestyle.
+
+Sampling was performed with reservoir sampling (Vitter's Algorithm R) within
+domain--year-bucket cells so that no single period or domain dominated the
+final sample and no bias was introduced by the order of records in the source
+files. Both submissions and comments were collected where available, using the
+\texttt{selftext} and \texttt{body} fields respectively.
+
+Cleaning included HTML entity decoding, zero-width character removal, bare URL
+removal, newline normalization, and internal whitespace normalization. Filters
+removed deleted or empty records, retained texts between 50 and 1,500 words,
+applied English-language detection, and performed exact deduplication on text.
+The final metadata preserved subreddit, domain, post type, year, word count,
+length bin, Reddit score, creation timestamp, and item ID.
+
+Important Reddit-specific limitations include thin sports and lifestyle
+coverage, the exclusion of \texttt{movies\_comments.zst} in the 80k version due
+to processing issues, and the fact that the post-2022 split is not a labeled
+AI-authorship benchmark. 
+
+\subsection{Reddit, Amazon Reviews, and News Pipeline Details}
+The Binoculars reruns reported in the paper for the corresponding domains used the Falcon-7B / Falcon-7B-Instruct pair in accuracy mode with threshold
+0.9015310749276843, batch size 8, and analysis artifacts generated from respective datasets.
+\end{document}

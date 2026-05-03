@@ -18,7 +18,7 @@ salloc \
     --cpus-per-task=8 \
     --mem=32G \
     --time=01:00:00 \
-    --account=snazaria_1817 \
+    --account=your_carc_account \
     bash -c "
         module purge
         module load conda

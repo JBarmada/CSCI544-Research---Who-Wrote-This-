@@ -7,13 +7,13 @@
 #SBATCH --time=24:00:00
 #SBATCH --output=logs/full_%j.out
 #SBATCH --error=logs/full_%j.err
-#SBATCH --account=snazaria_1817
+#SBATCH --account=your_carc_account
 
 set -euo pipefail
 
 PROJECT_DIR="${SLURM_SUBMIT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}"
 UPSTREAM_DIR="${UPSTREAM_DIR:-$PROJECT_DIR/.upstream/Binoculars}"
-PYTHON="${PYTHON:-/home1/barmada/.conda/envs/binoculars/bin/python}"
+PYTHON="${PYTHON:-${BINO_PYTHON:-$(which python)}}"
 export OPENBLAS_NUM_THREADS="${OPENBLAS_NUM_THREADS:-1}"
 export OMP_NUM_THREADS="${OMP_NUM_THREADS:-1}"
 export MKL_NUM_THREADS="${MKL_NUM_THREADS:-1}"

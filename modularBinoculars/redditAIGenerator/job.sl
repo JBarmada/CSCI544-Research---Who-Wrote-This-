@@ -7,7 +7,7 @@
 #SBATCH --time=24:00:00
 #SBATCH --output=logs/reddit_ai_gen_%j.out
 #SBATCH --error=logs/reddit_ai_gen_%j.err
-#SBATCH --account=snazaria_1817
+#SBATCH --account=your_carc_account
 
 # =============================================================================
 # job.sl — sbatch job for full Reddit AI generation runs
@@ -19,7 +19,7 @@
 #   MODEL_NAME=meta-llama/Llama-3.1-8B-Instruct sbatch job.sl
 # =============================================================================
 
-PYTHON=${PYTHON:-/home1/barmada/.conda/envs/reddit-ai-gen/bin/python}
+PYTHON=${PYTHON:-$(which python)}
 
 SOURCE=${SOURCE:-hf}
 DATASET=${DATASET:-validname/reddit-ai-detection-english-80k}
