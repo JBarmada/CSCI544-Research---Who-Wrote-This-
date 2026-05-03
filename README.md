@@ -35,6 +35,10 @@ csci544-ai-detection/
 ├── notebooks/                           # Colab notebooks (Colab + GPU)
 │   ├── arxiv_research_articles_dataset.ipynb   # S3 download → LaTeX strip → chunk → Binoculars
 │   ├── arxiv_fast_detect_gpt.ipynb             # Fast-DetectGPT cross-check (supporting)
+    ├── CCNews_dataset_collection.ipynb         # CCNews Dataset cokkection
+    ├── news_binoculars_scoring.ipynb           # Scoring news data from Google Drive
+    ├── news_data_preprocessing.ipynb           # News article preprocessing script
+    ├── news_gemma_rewrite.ipynb                # Rewriting articles using Gemma-2-2b
 │   └── binoculars_resumes.ipynb                # canonical resume scorer (4-bit NF4 + CPU spillover)
 └── report/
     ├── finalreport.pdf                  # compiled report
@@ -49,8 +53,8 @@ csci544-ai-detection/
 | Pipeline | Hardware | OS / runtime |
 |---|---|---|
 | Reddit (`modularBinoculars`) at scale | NVIDIA **A40** GPU on USC CARC SLURM | Rocky Linux, Python 3.9 conda env (`binoculars`) |
-| Reddit / News / Amazon Reviews / Resumes (notebook runs) | NVIDIA **T4** (Google Colab), batch size 8; resumes additionally use 4-bit NF4 quantization + `torch.float16` with CPU spillover | Ubuntu 22.04 (Colab) |
-| arXiv | NVIDIA **A100** (Google Colab) | Ubuntu 22.04 (Colab) |
+| Reddit / Amazon Reviews / Resumes (notebook runs) | NVIDIA **T4** (Google Colab), batch size 8; resumes additionally use 4-bit NF4 quantization + `torch.float16` with CPU spillover | Ubuntu 22.04 (Colab) |
+| arXiv / News | NVIDIA **A100** (Google Colab) | Ubuntu 22.04 (Colab) |
 | Reddit local smoke tests | CPU is fine with `--dry-run`; otherwise any CUDA 11.x+ GPU | Linux, macOS, or Windows + WSL2 |
 
 CUDA toolkit ≥ 11.x. Disk: ≥ 30 GB free (Falcon-7B + Falcon-7B-Instruct weights are ~15 GB each).
