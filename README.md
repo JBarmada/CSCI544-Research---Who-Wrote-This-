@@ -68,7 +68,7 @@ Open [`notebooks/arxiv_research_articles_dataset.ipynb`](notebooks/arxiv_researc
 
 | Secret name | Used by | Required for |
 |---|---|---|
-| `AWS_ACCESS_KEY_ID` | `arxiv_research_articles_dataset.ipynb` cell 5 | downloading arXiv source from S3 (requester-pays) |
+| `AWS_ACCESS_KEY_ID` | `arxiv_research_articles_dataset.ipynb` cell 5 | downloading arXiv source LaTeX from **Amazon S3** (Simple Storage Service — Amazon's cloud file storage). The arXiv bulk archive lives in a "requester-pays" S3 bucket, meaning you (not arXiv) pay the small download bandwidth cost on your own AWS account. |
 | `AWS_SECRET_ACCESS_KEY` | same | same |
 | `ANTHROPIC_API_KEY` | cell 33+ | optional — only for the LLM-rewrite positive-control cells |
 | `OPENAI_API_KEY` | cell 33+ | optional — same |
@@ -94,7 +94,7 @@ Pick whichever path is convenient:
 | **Google Drive** | All five domains: Reddit, News, Amazon Reviews, arXiv, Resumes — plus the original notebooks and pre-computed scored artifacts | <https://drive.google.com/drive/folders/1Lc-H9QUdukV-Us_R9T4BVwXTGS3Byf66?usp=sharing> |
 | **Pushshift torrent** | Reddit raw `.zst` archives (rebuild from scratch) | `RedditProcessor/reddittor.torrent` |
 
-The Drive folder mirrors the layout `gdrive_data/{Reddit-Dataset/, news_data/, ReviewData/, …}`. arXiv raw and Resumes are **Drive-only**; arXiv raw can alternatively be re-downloaded from the arXiv S3 bucket via the research-articles notebook.
+The Drive folder mirrors the layout `gdrive_data/{Reddit-Dataset/, news_data/, ReviewData/, …}`. arXiv raw and Resumes are **Drive-only**; arXiv raw can alternatively be re-downloaded from the arXiv Amazon S3 bucket via the research-articles notebook (see §3b for what S3 is).
 
 ---
 
@@ -129,11 +129,11 @@ The fastest path to the report numbers is to read pre-computed Binoculars-scored
 - **Amazon Reviews**: `ReviewData/Processed/processed_2020_2021.txt`, `processed_2022_2023.txt`, plus the GPT-2 control under `Computer Generated/cg_reviews.txt`.
 - **Resumes**: scored CSVs alongside the raw LiveCareer + Tech Resume + LLM-generated resume files in the Drive folder.
 
-To re-score these from scratch, see §5e.
+To re-score these from scratch, see [§5e](#5e-using-modularbinoculars-as-the-shared-scoring-engine-for-any-dataset).
 
 ### 5c. arXiv — Colab + A100
 
-1. Download the December 2021 and December 2025 arXiv source tars from S3 to Drive.
+1. Download the December 2021 and December 2025 arXiv source tars from Amazon S3 (the AWS-hosted arXiv bulk archive) to your mounted Drive.
 2. Strip LaTeX, chunk to 250 words.
 3. Score with Binoculars (Falcon-7B / Falcon-7B-Instruct, threshold `0.9015310749276843`).
 
@@ -145,7 +145,7 @@ The Fast-DetectGPT notebook (`notebooks/arxiv_fast_detect_gpt.ipynb`) is a suppo
 
 ### 5d. Resumes
 
-Drive-only. The pre-computed scored artifacts under the `gdrive_data` Drive folder reproduce the report numbers. To re-score from raw, follow §5e using the same threshold and quantization settings (4-bit NF4 + `torch.float16` for T4).
+Drive-only. The pre-computed scored artifacts under the `gdrive_data` Drive folder reproduce the report numbers. To re-score from raw, follow [§5e](#5e-using-modularbinoculars-as-the-shared-scoring-engine-for-any-dataset) using the same threshold and quantization settings (4-bit NF4 + `torch.float16` for T4).
 
 ### 5e. Using `modularBinoculars` as the shared scoring engine for any dataset
 
@@ -206,12 +206,12 @@ Mirrors the report's methodology section so the README maps directly onto the .t
 | Domain | Code in repo | Data location | Runs as-is? | Notes |
 |---|---|---|---|---|
 | Reddit | `modularBinoculars/` | HF `validname/reddit-ai-detection-english-80k` + Drive | **Yes** | Default `main.py` invocation. SLURM scripts need `--account` override. |
-| News | `modularBinoculars/` (re-score) + Drive artifacts | Drive `news_data/` | **Yes via §5e** | Pre-computed `news_core_summary.csv` is the fastest path; re-score by feeding parquet → CSV to `main.py`. |
-| Amazon Reviews | `modularBinoculars/` (re-score) + Drive artifacts | Drive `ReviewData/` | **Yes via §5e** | Wrap the Processed `.txt` files into a CSV with a `text` column. |
+| News | `modularBinoculars/` (re-score) + Drive artifacts | Drive `news_data/` | **Yes via [§5e](#5e-using-modularbinoculars-as-the-shared-scoring-engine-for-any-dataset)** | Pre-computed `news_core_summary.csv` is the fastest path; re-score by feeding parquet → CSV to `main.py`. |
+| Amazon Reviews | `modularBinoculars/` (re-score) + Drive artifacts | Drive `ReviewData/` | **Yes via [§5e](#5e-using-modularbinoculars-as-the-shared-scoring-engine-for-any-dataset)** | Wrap the Processed `.txt` files into a CSV with a `text` column. |
 | arXiv (raw → scored) | `notebooks/arxiv_research_articles_dataset.ipynb` | Drive + AWS S3 (requester-pays) | Colab + A100 only | End-to-end pipeline (S3 download → LaTeX strip → chunk → score) requires Colab + user-supplied keys. |
-| arXiv (re-score chunks) | `modularBinoculars/` | Drive `arxiv/processed/*` | **Yes via §5e** | If you only need to reproduce the scoring step, feed the pre-chunked CSVs to `main.py`. |
+| arXiv (re-score chunks) | `modularBinoculars/` | Drive `arxiv/processed/*` | **Yes via [§5e](#5e-using-modularbinoculars-as-the-shared-scoring-engine-for-any-dataset)** | If you only need to reproduce the scoring step, feed the pre-chunked CSVs to `main.py`. |
 | arXiv (FastDetectGPT) | `notebooks/arxiv_fast_detect_gpt.ipynb` | Drive | Partial | Comparative cell expects 2021 scoring that is commented out; re-enable before running. |
-| Resumes | `modularBinoculars/` (re-score) | Drive only | **Yes via §5e** | Rename summary→text, drop <15-word rows, then `main.py --source local`. |
+| Resumes | `modularBinoculars/` (re-score) | Drive only | **Yes via [§5e](#5e-using-modularbinoculars-as-the-shared-scoring-engine-for-any-dataset)** | Rename summary→text, drop <15-word rows, then `main.py --source local`. |
 
 ---
 
@@ -231,9 +231,9 @@ Plus controls: GPT-2 Amazon reviews 98.8% flagged (987/999); LLM-rewritten resum
 
 ## 9. Known limitations / honesty disclosures
 
-- The **arXiv pipeline** notebook is not "Run All" outside Colab + A100 — it embeds `/content/drive/...` paths and fetches from a requester-pays S3 bucket. (Re-scoring the pre-chunked CSVs via §5e is fully runnable, however.)
+- The **arXiv pipeline** notebook is not "Run All" outside Colab + A100 — it embeds `/content/drive/...` paths and fetches from a requester-pays S3 bucket. (Re-scoring the pre-chunked CSVs via [§5e](#5e-using-modularbinoculars-as-the-shared-scoring-engine-for-any-dataset) is fully runnable, however.)
 - The **Fast-DetectGPT** notebook is a supporting cross-check; one comparative cell depends on 2021 scoring that is currently commented out.
-- The **News, Reviews, Resumes** domain-specific loader/cleaner glue is not packaged in this repo. The scoring engine is — `modularBinoculars/main.py` reproduces the same Falcon-7B / Falcon-7B-Instruct + threshold `0.9015310749276843` pipeline on any CSV with a `text` column (§5e).
+- The **News, Reviews, Resumes** domain-specific loader/cleaner glue is not packaged in this repo. The scoring engine is — `modularBinoculars/main.py` reproduces the same Falcon-7B / Falcon-7B-Instruct + threshold `0.9015310749276843` pipeline on any CSV with a `text` column ([§5e](#5e-using-modularbinoculars-as-the-shared-scoring-engine-for-any-dataset)).
 - The original notebooks distributed with this work contained live API keys (AWS, Anthropic, OpenAI). Those keys have been rotated and the notebooks scrubbed; reviewers must supply their own keys via Colab Secrets.
 - `gdrive_data/` is intentionally not committed (size + speed); the [Drive folder](https://drive.google.com/drive/folders/1Lc-H9QUdukV-Us_R9T4BVwXTGS3Byf66?usp=sharing) is the canonical source for raw and scored data.
 
