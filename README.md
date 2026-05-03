@@ -246,7 +246,7 @@ Mirrors the report's methodology section so the README maps directly onto the .t
 
 ---
 
-## 8. Reported results (must match the report)
+## 8. Reported results
 
 | Domain | Pre-2022 flagged | Post-2022 flagged | Gap | n (pre / post) |
 |---|---|---|---|---|
